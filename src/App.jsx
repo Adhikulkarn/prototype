@@ -19,11 +19,11 @@ import MyChats from "./pages/influencer/MyChats";
 import NotEnoughTokens from "./pages/influencer/NotEnoughTokens";
 
 /* -------- VENDOR PAGES -------- */
+import Home from "./pages/vendor/Home";
 import VendorDashboard from "./pages/vendor/Dashboard";
 import CreateCampaign from "./pages/vendor/CreateCampaign";
-import MyProducts from "./pages/vendor/MyProducts";
+import Products from "./pages/vendor/Products";
 import SalesAnalytics from "./pages/vendor/SalesAnalytics";
-import CampaignPerformance from "./pages/vendor/CampaignPerformance";
 
 /* -------- NAVBARS -------- */
 import InfluencerNavbar from "./components/common/InfluencerNavbar";
@@ -106,14 +106,11 @@ function App() {
         />
 
         {/* -------- VENDOR -------- */}
-        <Route path="/vendor" element={<VendorDashboard />} />
+        <Route path="/vendor/home" element={<Home />} />
+        <Route path="/vendor/dashboard" element={<VendorDashboard />} />
         <Route path="/vendor/create" element={<CreateCampaign />} />
-        <Route path="/vendor/products" element={<MyProducts />} />
+        <Route path="/vendor/products" element={<Products />} />
         <Route path="/vendor/analytics" element={<SalesAnalytics />} />
-        <Route
-          path="/vendor/campaign/:id"
-          element={<CampaignPerformance />}
-        />
       </Routes>
     </Router>
   );

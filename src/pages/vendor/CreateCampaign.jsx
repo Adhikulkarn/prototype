@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PageWrapper from "../../components/common/PageWrapper";
 
 export default function CreateCampaign() {
   const [images, setImages] = useState([]);
@@ -9,41 +10,47 @@ export default function CreateCampaign() {
       file,
       preview: URL.createObjectURL(file),
     }));
-
     setImages(previews);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Prototype: just log data
-    console.log("Post created with images:", images);
-
     alert("Post created (prototype)");
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Create Marketing Post</h2>
+    <PageWrapper
+      title="Create Marketing Post"
+      subtitle="Describe the product you want influencers to promote"
+    >
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-xl shadow space-y-5 max-w-3xl"
+      >
+        <div>
+          <label className="block font-medium mb-1">
+            Product Name
+          </label>
+          <input
+            className="border p-3 w-full rounded"
+            required
+          />
+        </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          className="border p-3 w-full rounded"
-          placeholder="Product Name"
-          required
-        />
+        <div>
+          <label className="block font-medium mb-1">
+            Description
+          </label>
+          <textarea
+            className="border p-3 w-full rounded"
+            rows={4}
+            required
+          />
+        </div>
 
-        <textarea
-          className="border p-3 w-full rounded"
-          placeholder="Post Description"
-          rows={4}
-          required
-        />
-
-        {/* Image Upload */}
         <div>
           <label className="block font-medium mb-2">
-            Upload Product Images
+            Upload Images
           </label>
           <input
             type="file"
@@ -53,25 +60,23 @@ export default function CreateCampaign() {
           />
         </div>
 
-        {/* Image Preview */}
         {images.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-            {images.map((img, index) => (
-              <div key={index} className="border rounded p-2">
-                <img
-                  src={img.preview}
-                  alt="preview"
-                  className="h-32 w-full object-cover rounded"
-                />
-              </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {images.map((img, i) => (
+              <img
+                key={i}
+                src={img.preview}
+                alt="preview"
+                className="h-32 w-full object-cover rounded"
+              />
             ))}
           </div>
         )}
 
         <button className="bg-purple-600 text-white px-6 py-3 rounded">
-          Create Post
+          Publish Post
         </button>
       </form>
-    </div>
+    </PageWrapper>
   );
 }
