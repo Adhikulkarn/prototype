@@ -19,7 +19,6 @@ export default function InfluencerProfile() {
     availability: "Open",
   });
 
-  // 🔹 Load profile
   useEffect(() => {
     api(`/profile/${userId}`)
       .then((data) => {
@@ -46,208 +45,232 @@ export default function InfluencerProfile() {
 
   const handleSave = async () => {
     setSaving(true);
-
     await api("/profile", {
       method: "POST",
-      body: JSON.stringify({
-        user_id: userId,
-        ...profile,
-      }),
+      body: JSON.stringify({ user_id: userId, ...profile }),
     });
-
     setSaving(false);
     setIsSaved(true);
   };
 
   if (loading) {
-    return <PageWrapper title="Loading profile..." />;
+    return (
+      <PageWrapper>
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 animate-pulse">
+          Loading profile...
+        </div>
+      </PageWrapper>
+    );
   }
 
   return (
-    <PageWrapper
-      title="My Profile"
-      subtitle="This is how vendors see you"
-    >
-      {/* ================= VIEW MODE ================= */}
-      {isSaved ? (
-        <div className="bg-white p-6 rounded-xl shadow max-w-3xl space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold">{profile.name}</h2>
-            <p className="text-gray-600">
-              {profile.niche} Creator
+    <PageWrapper>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 px-6 py-14">
+
+        <div className="max-w-4xl mx-auto bg-slate-900/90 backdrop-blur border border-slate-800 rounded-3xl p-10 shadow-2xl shadow-blue-500/20 animate-fadeIn">
+
+          {/* HEADER */}
+          <div className="mb-10 border-b border-slate-800 pb-6">
+            <h1 className="text-3xl font-semibold text-blue-400">
+              My Profile
+            </h1>
+            <p className="text-slate-400 text-sm mt-1">
+              This is how vendors see you
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="bg-gray-50 p-3 rounded">
-              <p className="text-gray-500">Followers</p>
-              <p className="font-medium">
-                {profile.followers_range}
-              </p>
-            </div>
-            <div className="bg-gray-50 p-3 rounded">
-              <p className="text-gray-500">Engagement</p>
-              <p className="font-medium">
-                {profile.engagement}
-              </p>
-            </div>
-          </div>
+          {isSaved ? (
+            /* ================= VIEW MODE ================= */
+            <div className="space-y-10">
 
-          <div>
-            <p className="font-medium mb-2">Content Types</p>
-            <div className="flex flex-wrap gap-2">
-              {profile.content_types.map((type) => (
-                <span
-                  key={type}
-                  className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
-                >
-                  {type}
-                </span>
-              ))}
-            </div>
-          </div>
+              <section className="bg-slate-800/70 rounded-2xl p-6 border border-slate-700">
+                <h2 className="text-2xl font-bold text-white">
+                  {profile.name}
+                </h2>
+                <p className="text-slate-400 mt-1">
+                  {profile.niche} Creator
+                </p>
+              </section>
 
-          <div>
-            <p className="font-medium mb-1">About</p>
-            <p className="text-gray-600 text-sm">
-              {profile.bio || "—"}
-            </p>
-          </div>
-
-          <div className="bg-green-50 p-4 rounded border text-green-800 text-sm">
-            Status: {profile.availability}
-          </div>
-
-          {/* OPTIONAL EDIT */}
-          <button
-            onClick={() => setIsSaved(false)}
-            className="text-sm text-blue-600"
-          >
-            Edit Profile
-          </button>
-        </div>
-      ) : (
-        /* ================= EDIT MODE ================= */
-        <div className="bg-white p-6 rounded-xl shadow max-w-3xl space-y-6">
-
-          <div>
-            <label className="block font-medium mb-1">
-              Display Name
-            </label>
-            <input
-              value={profile.name}
-              onChange={(e) =>
-                handleChange("name", e.target.value)
-              }
-              className="border p-3 w-full rounded"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block font-medium mb-1">
-              Primary Niche
-            </label>
-            <select
-              value={profile.niche}
-              onChange={(e) =>
-                handleChange("niche", e.target.value)
-              }
-              className="border p-3 w-full rounded"
-            >
-              <option value="">Select niche</option>
-              <option>Lifestyle</option>
-              <option>Fashion</option>
-              <option>Fitness</option>
-              <option>Tech</option>
-              <option>Beauty</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block font-medium mb-1">
-              Followers Range
-            </label>
-            <select
-              value={profile.followers_range}
-              onChange={(e) =>
-                handleChange("followers_range", e.target.value)
-              }
-              className="border p-3 w-full rounded"
-            >
-              <option value="">Select range</option>
-              <option>1k–10k</option>
-              <option>10k–50k</option>
-              <option>50k–100k</option>
-              <option>100k+</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block font-medium mb-1">
-              Engagement Level
-            </label>
-            <select
-              value={profile.engagement}
-              onChange={(e) =>
-                handleChange("engagement", e.target.value)
-              }
-              className="border p-3 w-full rounded"
-            >
-              <option value="">Select</option>
-              <option>High</option>
-              <option>Medium</option>
-              <option>Low</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block font-medium mb-2">
-              Content Types
-            </label>
-            <div className="flex flex-wrap gap-3">
-              {["Reels", "Shorts", "Posts", "Stories"].map(
-                (type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => toggleContentType(type)}
-                    className={`px-4 py-2 rounded border ${
-                      profile.content_types.includes(type)
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-100"
-                    }`}
+              <section className="grid sm:grid-cols-2 gap-6">
+                {[
+                  ["Followers", profile.followers_range],
+                  ["Engagement", profile.engagement],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="bg-slate-800/70 rounded-2xl p-5 border border-slate-700"
                   >
-                    {type}
-                  </button>
-                )
-              )}
+                    <p className="text-xs text-slate-400 uppercase">
+                      {label}
+                    </p>
+                    <p className="text-white font-medium mt-1">
+                      {value}
+                    </p>
+                  </div>
+                ))}
+              </section>
+
+              <section className="bg-slate-800/70 rounded-2xl p-6 border border-slate-700">
+                <p className="text-slate-300 font-medium mb-3">
+                  Content Types
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {profile.content_types.map((type) => (
+                    <span
+                      key={type}
+                      className="px-4 py-1.5 rounded-full text-sm bg-blue-600/20 text-blue-300 border border-blue-500/30"
+                    >
+                      {type}
+                    </span>
+                  ))}
+                </div>
+              </section>
+
+              <section className="bg-slate-800/70 rounded-2xl p-6 border border-slate-700">
+                <p className="text-slate-300 font-medium mb-2">
+                  About
+                </p>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  {profile.bio || "—"}
+                </p>
+              </section>
+
+              <section className="bg-green-600/10 border border-green-500/30 rounded-2xl p-4 text-green-300 text-sm">
+                Status: {profile.availability}
+              </section>
+
+              <button
+                onClick={() => setIsSaved(false)}
+                className="text-blue-400 hover:text-blue-300 transition text-sm"
+              >
+                Edit Profile
+              </button>
             </div>
-          </div>
+          ) : (
+            /* ================= EDIT MODE ================= */
+            <div className="space-y-8">
 
-          <div>
-            <label className="block font-medium mb-1">
-              Short Bio
-            </label>
-            <textarea
-              value={profile.bio}
-              onChange={(e) =>
-                handleChange("bio", e.target.value)
-              }
-              className="border p-3 w-full rounded"
-              rows={3}
-            />
-          </div>
+              {/* FORM CARD */}
+              <section className="bg-slate-800/70 rounded-2xl p-6 border border-slate-700 space-y-6">
 
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-blue-600 text-white px-6 py-3 rounded disabled:opacity-60"
-          >
-            {saving ? "Saving..." : "Save Profile"}
-          </button>
+                {/* INPUT */}
+                <div>
+                  <label className="text-slate-300 text-sm mb-1 block">
+                    Display Name
+                  </label>
+                  <input
+                    value={profile.name}
+                    onChange={(e) => handleChange("name", e.target.value)}
+                    className="
+                      w-full
+                      bg-slate-900
+                      border border-slate-600
+                      p-3
+                      rounded-xl
+                      text-slate-200
+                      transition
+                      focus:border-blue-500
+                      focus:ring-2 focus:ring-blue-500/40
+                      outline-none
+                    "
+                  />
+                </div>
+
+                {/* SELECTS */}
+                {[
+                  ["Primary Niche", "niche", ["Lifestyle","Fashion","Fitness","Tech","Beauty"]],
+                  ["Followers Range", "followers_range", ["1k–10k","10k–50k","50k–100k","100k+"]],
+                  ["Engagement Level", "engagement", ["High","Medium","Low"]],
+                ].map(([label, field, options]) => (
+                  <div key={field}>
+                    <label className="text-slate-300 text-sm mb-1 block">
+                      {label}
+                    </label>
+                    <select
+                      value={profile[field]}
+                      onChange={(e) => handleChange(field, e.target.value)}
+                      className="
+                        w-full
+                        bg-slate-900
+                        border border-slate-600
+                        p-3
+                        rounded-xl
+                        text-slate-200
+                        transition
+                        focus:border-blue-500
+                        focus:ring-2 focus:ring-blue-500/40
+                        outline-none
+                      "
+                    >
+                      <option value="">Select</option>
+                      {options.map((o) => (
+                        <option key={o}>{o}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </section>
+
+              {/* CONTENT TYPES */}
+              <section className="bg-slate-800/70 rounded-2xl p-6 border border-slate-700">
+                <p className="text-slate-300 mb-3">Content Types</p>
+                <div className="flex flex-wrap gap-3">
+                  {["Reels", "Shorts", "Posts", "Stories"].map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => toggleContentType(type)}
+                      className={`
+                        px-4 py-2 rounded-xl border transition
+                        ${
+                          profile.content_types.includes(type)
+                            ? "bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-500/30"
+                            : "bg-slate-900 text-slate-300 border-slate-600 hover:bg-slate-800"
+                        }
+                      `}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              {/* BIO */}
+              <section className="bg-slate-800/70 rounded-2xl p-6 border border-slate-700">
+                <label className="text-slate-300 text-sm mb-1 block">
+                  Short Bio
+                </label>
+                <textarea
+                  value={profile.bio}
+                  onChange={(e) => handleChange("bio", e.target.value)}
+                  rows={3}
+                  className="
+                    w-full
+                    bg-slate-900
+                    border border-slate-600
+                    p-3
+                    rounded-xl
+                    text-slate-200
+                    transition
+                    focus:border-blue-500
+                    focus:ring-2 focus:ring-blue-500/40
+                    outline-none
+                  "
+                />
+              </section>
+
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 transition text-white px-8 py-3 rounded-xl font-medium shadow-lg shadow-blue-500/40 disabled:opacity-60"
+              >
+                {saving ? "Saving..." : "Save Profile"}
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </PageWrapper>
   );
 }

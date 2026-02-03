@@ -7,19 +7,33 @@ from db import engine, SessionLocal
 from fastapi.middleware.cors import CORSMiddleware
 from analytics import generate_insights
 from sqlalchemy import text
+from fastapi import Request
+from fastapi.responses import Response
+
 
 # create tables
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+@app.options("/{path:path}")
+def options_handler(path: str, request: Request):
+    return Response(status_code=200)
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","http://127.0.0.1:5173"],  # frontend URL
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # --------------------
 # DATABASE DEPENDENCY

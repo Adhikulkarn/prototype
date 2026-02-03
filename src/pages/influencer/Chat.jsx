@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import PageWrapper from "../../components/common/PageWrapper";
 import { api } from "../../services/api";
 
 export default function Chat({ tokens, setTokens }) {
-  const { id } = useParams(); // chatId
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
 
+  const bottomRef = useRef(null);
   const userId = Number(localStorage.getItem("userId"));
 
   const FREE_LIMIT = 5;
@@ -20,11 +21,31 @@ export default function Chat({ tokens, setTokens }) {
   const msgKey = `chat_msgs_${userId}_${id}`;
   const paidKey = `chat_paid_blocks_${userId}_${id}`;
 
+  // ✅ LOAD MESSAGES + SEND AUTO MESSAGE ONLY IF EMPTY
   useEffect(() => {
-    api(`/messages/${id}`).then((data) => {
+    api(`/messages/${id}`).then(async (data) => {
+      // If no messages exist, send default message ONCE
+      if (data.length === 0) {
+        await api("/messages", {
+          method: "POST",
+          body: JSON.stringify({
+            chat_id: Number(id),
+            sender_id: userId,
+            text: "Hi, I’m interested in this campaign.",
+          }),
+        });
+
+        // Reload messages after sending
+        const updated = await api(`/messages/${id}`);
+        setMessages(updated);
+
+        localStorage.setItem(msgKey, 1);
+        return;
+      }
+
+      // Normal case
       setMessages(data);
 
-      // sync influencer message count
       const influencerCount = data.filter(
         (m) => m.sender_id === userId
       ).length;
@@ -32,6 +53,11 @@ export default function Chat({ tokens, setTokens }) {
       localStorage.setItem(msgKey, influencerCount);
     });
   }, [id, userId]);
+
+  // Auto scroll
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const sentCount =
     Number(localStorage.getItem(msgKey)) || 0;
@@ -53,7 +79,6 @@ export default function Chat({ tokens, setTokens }) {
 
     setSending(true);
 
-    // 🔒 Deduct tokens ONLY when entering a new block
     if (requiredBlocks > paidBlocks) {
       const tokenRes = await api(
         `/tokens/deduct?user_id=${userId}&amount=${BLOCK_COST}`,
@@ -65,10 +90,7 @@ export default function Chat({ tokens, setTokens }) {
         return;
       }
 
-      localStorage.setItem(
-        paidKey,
-        paidBlocks + 1
-      );
+      localStorage.setItem(paidKey, paidBlocks + 1);
       setTokens(tokenRes.tokens);
     }
 
@@ -90,53 +112,58 @@ export default function Chat({ tokens, setTokens }) {
   };
 
   return (
-    <PageWrapper title="Chat">
-      <div className="bg-white rounded-xl shadow h-[70vh] flex flex-col">
+    <PageWrapper>
+      <div className="h-[calc(100vh-64px)] bg-slate-950 flex flex-col">
 
         {/* HEADER */}
-        <div className="border-b p-4 flex justify-between items-center">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800">
           <div>
-            <p className="font-medium">Conversation</p>
-            <p className="text-xs text-gray-500">
+            <h2 className="text-lg font-semibold text-blue-400">
+              Conversation
+            </h2>
+            <p className="text-xs text-slate-400">
               {sentCount < FREE_LIMIT
                 ? `${FREE_LIMIT - sentCount} free messages left`
                 : `5 tokens per ${PAID_BLOCK_SIZE} messages`}
             </p>
           </div>
 
-          <div className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full border">
+          <div className="text-xs bg-blue-500/15 text-blue-300 px-3 py-1 rounded-full border border-blue-500/30">
             {tokens} Tokens
           </div>
         </div>
 
         {/* MESSAGES */}
-        <div className="flex-1 p-4 space-y-3 overflow-y-auto">
+        <div className="flex-1 px-6 py-4 overflow-y-auto space-y-3">
           {messages.map((m) => (
             <div
               key={m.id}
-              className={`px-4 py-2 rounded-xl max-w-xs text-sm ${
-                m.sender_id === userId
-                  ? "bg-blue-600 text-white ml-auto"
-                  : "bg-gray-100 text-gray-800"
-              }`}
+              className={`max-w-sm px-4 py-2 rounded-2xl text-sm
+                ${
+                  m.sender_id === userId
+                    ? "ml-auto bg-blue-500 text-white"
+                    : "mr-auto bg-slate-800 text-slate-200"
+                }
+              `}
             >
               {m.text}
             </div>
           ))}
+          <div ref={bottomRef} />
         </div>
 
         {/* INPUT */}
-        <div className="border-t p-4 flex gap-2">
+        <div className="px-6 py-4 border-t border-slate-800 flex gap-3 bg-slate-950">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="border p-3 flex-1 rounded"
-            placeholder="Type a message..."
+            placeholder="Type your message..."
+            className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400/40"
           />
           <button
             onClick={handleSend}
             disabled={sending}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 rounded disabled:opacity-60"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 rounded-xl transition active:scale-95 disabled:opacity-60"
           >
             Send
           </button>
