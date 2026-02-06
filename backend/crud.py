@@ -58,6 +58,79 @@ def create_campaign(db: Session, vendor_id: int, product_name: str, description:
 def get_all_campaigns(db: Session):
     return db.query(models.Campaign).all()
 
+
+
+
+def create_or_get_chat(
+    db: Session,
+    campaign_id: int,
+    vendor_id: int,
+    influencer_id: int
+):
+    chat = (
+        db.query(models.Chat)
+        .filter(
+            models.Chat.campaign_id == campaign_id,
+            models.Chat.vendor_id == vendor_id,
+            models.Chat.influencer_id == influencer_id
+        )
+        .first()
+    )
+
+    if not chat:
+        chat = models.Chat(
+            campaign_id=campaign_id,
+            vendor_id=vendor_id,
+            influencer_id=influencer_id
+        )
+        db.add(chat)
+        db.commit()
+        db.refresh(chat)
+
+    return chat
+
+
+def get_chats_by_user(db: Session, user_id: int):
+    return (
+        db.query(models.Chat)
+        .filter(
+            (models.Chat.vendor_id == user_id) |
+            (models.Chat.influencer_id == user_id)
+        )
+        .all()
+    )
+
+def create_message(
+    db: Session,
+    chat_id: int,
+    sender_id: int,
+    text: str
+):
+    message = models.Message(
+        chat_id=chat_id,
+        sender_id=sender_id,
+        text=text
+    )
+
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+
+    return message
+
+
+def get_messages_by_chat(
+    db: Session,
+    chat_id: int
+):
+    return (
+        db.query(models.Message)
+        .filter(models.Message.chat_id == chat_id)
+        .order_by(models.Message.created_at)
+        .all()
+    )
+
+
 # --------------------
 # ANALYTICS → AI ADAPTER
 # --------------------
