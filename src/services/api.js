@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "https://prototype-1-xfok.onrender.com";
 
 export async function api(url, options = {}) {
   const res = await fetch(`${BASE_URL}${url}`, {
