@@ -68,7 +68,7 @@ export default function Billing() {
   return (
     <PageWrapper
       title="Generate Bill"
-      subtitle="Classic multi-product billing"
+      // subtitle="Classic multi-product billing"
     >
       <div className="bg-white border rounded-2xl shadow-sm p-8 max-w-xl space-y-6">
 
