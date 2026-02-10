@@ -11,17 +11,12 @@ COPY ../package-lock.json ./
 # Install frontend dependencies
 RUN npm install
 
-# Copy frontend source code and build from the parent directory
-COPY ../src ./src
+# Copy main frontend files
 COPY ../index.html ./
 COPY ../vite.config.js ./
 COPY ../eslint.config.js ./
-COPY ../App.css ./
-COPY ../index.css ./
-COPY ../main.jsx ./
-# If tailwind.config.js or postcss.config.js exist in the root, copy them too
-# COPY ../tailwind.config.js ./
-# COPY ../postcss.config.js ./
+# Copy the entire src directory
+COPY ../src ./src
 
 RUN npm run build
 
