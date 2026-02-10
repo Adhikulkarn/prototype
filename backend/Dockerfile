@@ -4,22 +4,33 @@ FROM node:18-alpine AS frontend-builder
 WORKDIR /app/frontend
 
 # Copy package.json and package-lock.json first to leverage Docker cache
-COPY package.json ./
-COPY package-lock.json ./
+# These are in the parent directory relative to the backend build context
+COPY ../package.json ./
+COPY ../package-lock.json ./
 
 # Install frontend dependencies
 RUN npm install
 
-# Copy frontend source code and build
-COPY . .
+# Copy frontend source code and build from the parent directory
+COPY ../src ./src
+COPY ../index.html ./
+COPY ../vite.config.js ./
+COPY ../eslint.config.js ./
+COPY ../App.css ./
+COPY ../index.css ./
+COPY ../main.jsx ./
+# If tailwind.config.js or postcss.config.js exist in the root, copy them too
+# COPY ../tailwind.config.js ./
+# COPY ../postcss.config.js ./
+
 RUN npm run build
 
 
 # --- Stage 2: Backend Build ---
 FROM python:3.10-slim-bullseye
 
-# Copy the backend directory first
-COPY backend /app/backend
+# Copy the backend directory (which is the current build context) into /app/backend
+COPY . /app/backend
 
 # Set the working directory in the container
 WORKDIR /app/backend
