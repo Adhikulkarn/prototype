@@ -28,7 +28,7 @@ FROM python:3.10-slim-bullseye
 WORKDIR /app/backend
 
 # Install any needed packages specified in requirements.txt
-COPY backend/requirements.txt .
+COPY requirements.txt .
 # Install system dependencies
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
