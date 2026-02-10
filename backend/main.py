@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
-from fastapi.responses import Response
+from fastapi.responses import Response, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from pathlib import Path
@@ -15,8 +16,8 @@ from db import engine, SessionLocal
 # --------------------
 # ENV SETUP
 # --------------------
-# BASE_DIR = Path(__file__).resolve().parent
-# load_dotenv(BASE_DIR / ".env")
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
 
 # --------------------
 # DB + APP SETUP
@@ -218,3 +219,17 @@ def marketing_insights(vendor_id: int, db: Session = Depends(get_db)):
     return {
         "marketing_insights": crud.safe_parse_ai_response(ai_text)
     }
+
+# --------------------
+# SERVE STATIC FILES
+# --------------------
+app.mount(
+    "/",
+    StaticFiles(directory=Path(__file__).parent.parent / "dist", html=True),
+    name="static",
+)
+
+
+@app.get("/{full_path:path}")
+async def serve_index(full_path: str):
+    return HTMLResponse(content=(Path(__file__).parent.parent / "dist" / "index.html").read_text(), status_code=200)
