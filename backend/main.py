@@ -217,6 +217,6 @@ def marketing_insights(vendor_id: int, db: Session = Depends(get_db)):
 # --------------------
 # HEALTH CHECK (RECOMMENDED)
 # --------------------
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health():
-    return {"status": "ok"}
+    return Response(status_code=200)
