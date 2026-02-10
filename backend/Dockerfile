@@ -7,7 +7,7 @@ WORKDIR /app/backend
 # Install any needed packages specified in requirements.txt
 COPY requirements.txt .
 # Install system dependencies
-RUN apt-get update --allow-release-info-change
+RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
