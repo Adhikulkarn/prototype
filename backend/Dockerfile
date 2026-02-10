@@ -4,19 +4,19 @@ FROM node:18-alpine AS frontend-builder
 WORKDIR /app/frontend
 
 # Copy package.json and package-lock.json first to leverage Docker cache
-# These are in the parent directory relative to the backend build context
-COPY ../package.json ./
-COPY ../package-lock.json ./
+COPY package.json ./
+COPY package-lock.json ./
 
 # Install frontend dependencies
 RUN npm install
 
-# Copy main frontend files
-COPY ../index.html ./
-COPY ../vite.config.js ./
-COPY ../eslint.config.js ./
-# Copy the entire src directory
-COPY ../src ./src
+# Copy frontend source code and build
+COPY index.html ./
+COPY vite.config.js ./
+COPY eslint.config.js ./
+COPY src ./src
+# If public folder exists in the root, copy it as well
+# COPY public ./public
 
 RUN npm run build
 
@@ -24,14 +24,11 @@ RUN npm run build
 # --- Stage 2: Backend Build ---
 FROM python:3.10-slim-bullseye
 
-# Copy the backend directory (which is the current build context) into /app/backend
-COPY . /app/backend
-
 # Set the working directory in the container
 WORKDIR /app/backend
 
 # Install any needed packages specified in requirements.txt
-COPY requirements.txt .
+COPY backend/requirements.txt .
 # Install system dependencies
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -39,6 +36,9 @@ RUN apt-get update && \
     libpq-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the backend application code
+COPY backend/. .
 
 # Copy the built frontend from the frontend-builder stage
 COPY --from=frontend-builder /app/frontend/dist /app/dist
