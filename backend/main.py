@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
-from fastapi.responses import Response, HTMLResponse
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from pathlib import Path
@@ -37,9 +36,7 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://localhost:5174",
         "http://127.0.0.1:5174",
-        "127.0.0.1:8000",
         "http://127.0.0.1:8000",
-        "https://prototype-iota-ivory.vercel.app",
         "https://prototype-iota-ivory.vercel.app",
     ],
     allow_credentials=True,
@@ -153,13 +150,10 @@ def get_products(vendor_id: int, db: Session = Depends(get_db)):
     return crud.get_products(db, vendor_id)
 
 # --------------------
-# BILLS (FIXED)
+# BILLS
 # --------------------
 @app.post("/bills", response_model=schemas.BillOut)
-def create_bill(
-    bill: schemas.BillCreate,
-    db: Session = Depends(get_db)
-):
+def create_bill(bill: schemas.BillCreate, db: Session = Depends(get_db)):
     try:
         return crud.create_bill(db, bill)
     except Exception:
@@ -221,15 +215,8 @@ def marketing_insights(vendor_id: int, db: Session = Depends(get_db)):
     }
 
 # --------------------
-# SERVE STATIC FILES
+# HEALTH CHECK (RECOMMENDED)
 # --------------------
-app.mount(
-    "/",
-    StaticFiles(directory=Path(__file__).parent.parent / "dist", html=True),
-    name="static",
-)
-
-
-@app.get("/{full_path:path}")
-async def serve_index(full_path: str):
-    return HTMLResponse(content=(Path(__file__).parent.parent / "dist" / "index.html").read_text(), status_code=200)
+@app.get("/health")
+def health():
+    return {"status": "ok"}
