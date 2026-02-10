@@ -6,7 +6,6 @@ services:
     repo: https://github.com/your-username/your-repo-name # Replace with your repo URL
     dockerfilePath: ./backend/Dockerfile
     dockerContext: .
-    buildCommand: "npm install && npm run build"
     envVars:
       - key: GEMINI_API_KEY
         sync: false # Set this in the Render dashboard
