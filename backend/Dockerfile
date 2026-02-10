@@ -18,11 +18,14 @@ RUN npm run build
 # --- Stage 2: Backend Build ---
 FROM python:3.10-slim-bullseye
 
+# Copy the backend directory first
+COPY backend /app/backend
+
 # Set the working directory in the container
 WORKDIR /app/backend
 
 # Install any needed packages specified in requirements.txt
-COPY backend/requirements.txt .
+COPY requirements.txt .
 # Install system dependencies
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -30,9 +33,6 @@ RUN apt-get update && \
     libpq-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the backend application code
-COPY backend/. .
 
 # Copy the built frontend from the frontend-builder stage
 COPY --from=frontend-builder /app/frontend/dist /app/dist
