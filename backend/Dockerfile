@@ -6,10 +6,10 @@ WORKDIR /app/backend
 
 # Install any needed packages specified in requirements.txt
 COPY requirements.txt .
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     build-essential \
     libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the current directory contents into the container at /app/backend
