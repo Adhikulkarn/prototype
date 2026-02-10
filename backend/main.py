@@ -36,6 +36,8 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://localhost:5174",
         "http://127.0.0.1:5174",
+        "127.0.0.1:8000",
+        "http://127.0.0.1:8000",
         "https://prototype-iota-ivory.vercel.app",
         "https://prototype-iota-ivory.vercel.app",
     ],
