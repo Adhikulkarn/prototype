@@ -1,50 +1,24 @@
-# --- Stage 1: Frontend Build ---
-FROM node:18-alpine AS frontend-builder
+FROM python:3.11-slim
 
-WORKDIR /app/frontend
+# Prevents Python from buffering logs (important for Render logs)
+ENV PYTHONUNBUFFERED=1
 
-# Copy package.json and package-lock.json first to leverage Docker cache
-COPY package.json ./
-COPY package-lock.json ./
+WORKDIR /app
 
-# Install frontend dependencies
-RUN npm install
-
-# Copy frontend source code and build
-COPY index.html ./
-COPY vite.config.js ./
-COPY eslint.config.js ./
-COPY src ./src
-# If public folder exists in the root, copy it as well
-# COPY public ./public
-
-RUN npm run build
-
-
-# --- Stage 2: Backend Build ---
-FROM python:3.10-slim-bullseye
-
-# Set the working directory in the container
-WORKDIR /app/backend
-
-# Install any needed packages specified in requirements.txt
-COPY requirements.txt .
-# Install system dependencies
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+# Install system deps (optional but safe)
+RUN apt-get update && apt-get install -y \
     build-essential \
-    libpq-dev \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python deps first (better layer caching)
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the backend application code
-COPY backend /backend
+# Copy the rest of the backend code
+COPY . .
 
-# Copy the built frontend from the frontend-builder stage
-COPY --from=frontend-builder /app/frontend/dist /app/dist
-
-# Expose port 8000 for the FastAPI application
+# Expose the port Render expects
 EXPOSE 8000
 
-# Run the Uvicorn server when the container launches
+# Start FastAPI
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

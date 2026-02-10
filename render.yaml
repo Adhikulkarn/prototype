@@ -3,15 +3,19 @@ services:
     name: anwariya-backend-prototype
     env: docker
     plan: free
-    repo: https://github.com/your-username/your-repo-name # Replace with your repo URL
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: .
+
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+
     envVars:
       - key: GEMINI_API_KEY
-        sync: false # Set this in the Render dashboard
+        sync: false
+
+      # IMPORTANT: absolute path for sqlite inside container
       - key: DATABASE_URL
-        value: "sqlite:///./data/app.db"
+        value: "sqlite:////app/data/app.db"
+
     disk:
       name: anwariya-data
-      mountPath: /app/backend/data
+      mountPath: /app/data
       sizeGB: 1
