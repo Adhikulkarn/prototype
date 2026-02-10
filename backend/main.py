@@ -15,8 +15,8 @@ from db import engine, SessionLocal
 # --------------------
 # ENV SETUP
 # --------------------
-BASE_DIR = Path(__file__).resolve().parent
-load_dotenv(BASE_DIR / ".env")
+# BASE_DIR = Path(__file__).resolve().parent
+# load_dotenv(BASE_DIR / ".env")
 
 # --------------------
 # DB + APP SETUP
